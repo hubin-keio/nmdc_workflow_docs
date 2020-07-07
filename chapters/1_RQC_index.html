@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Reads QC Workflow &#8212; NMDC Workflows 0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Metagenome assembled genomes generation workflow" href="2_MAG_index.html" />
+    <link rel="prev" title="Overview" href="overview.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="the-reads-qc-workflow">
+<h1>The Reads QC Workflow<a class="headerlink" href="#the-reads-qc-workflow" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>This workflow is replicate the <a class="reference external" href="https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/data-preprocessing/">QA protocol</a> implemented at JGI for Illumina reads and use the program “rqcfilter2” from BBTools(38:44) which implements them as a pipeline.</p>
+</div>
+<div class="section" id="workflow-diagram">
+<h2>Workflow Diagram<a class="headerlink" href="#workflow-diagram" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="../_images/1_RQC_rqc_workflow.png"><img alt="../_images/1_RQC_rqc_workflow.png" class="align-center" src="../_images/1_RQC_rqc_workflow.png" style="width: 533.0px; height: 282.0px;" /></a>
+</div>
+<div class="section" id="workflow-dependencies">
+<h2>Workflow Dependencies<a class="headerlink" href="#workflow-dependencies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="third-party-software">
+<h3>Third party software<a class="headerlink" href="#third-party-software" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>BBTools:38.44 <a class="reference external" href="https://bitbucket.org/berkeleylab/jgi-bbtools/src/master/license.txt">(BSD-3-Clause-LBNL)</a></p></li>
+</ul>
+</div>
+<div class="section" id="database">
+<h3>Database<a class="headerlink" href="#database" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>RQCFilterData Database <a class="reference external" href="http://portal.nersc.gov/dna/microbial/assembly/bushnell/RQCFilterData.tar">(RQCFilterData.tar)</a></p>
+<blockquote>
+<div><p>It is a 106G tar file includes reference datasets of artifacts, adapters, contaminants, phiX genome, host genomes.</p>
+</div></blockquote>
+</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget http://portal.nersc.gov/dna/microbial/assembly/bushnell/RQCFilterData.tar
+tar -xvf RQCFilterData.tar
+rm RQCFilterData.tar
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="workflow-availability">
+<h2>Workflow Availability<a class="headerlink" href="#workflow-availability" title="Permalink to this headline">¶</a></h2>
+<p>The workflow is available in GitHub:
+<a class="reference external" href="https://github.com/microbiomedata/ReadsQC">https://github.com/microbiomedata/ReadsQC</a></p>
+<p>The container is available at Docker Hub (microbiomedata/bbtools):
+<a class="reference external" href="https://hub.docker.com/r/microbiomedata/bbtools">https://hub.docker.com/r/microbiomedata/bbtools</a></p>
+</div>
+<div class="section" id="test-datasets">
+<h2>Test datasets<a class="headerlink" href="#test-datasets" title="Permalink to this headline">¶</a></h2>
+<p>Zymobiomics mock-community DNA control <a class="reference external" href="https://www.ebi.ac.uk/ena/browser/view/SRR7877884">(SRR7877884)</a></p>
+</div>
+<div class="section" id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h2>
+<p>Using rqcfilter2.sh from BBTools performs quality-trimming, artifact removal, linker-trimming, adapter trimming, and spike-in removal(BBDuk) and performs human/cat/dog/mouse/microbe removal (BBMap).</p>
+<div class="section" id="inputs">
+<h3>Inputs<a class="headerlink" href="#inputs" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>The input is a json file</p></li>
+</ul>
+<div class="highlight-JSON notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;jgi_rqcfilter.database&quot;</span><span class="p">:</span> <span class="s2">&quot;/path/to/database&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;jgi_rqcfilter.input_files&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;/path/to/SRR7877884.fastq.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;/path/to/Second.fastq.gz&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;jgi_rqcfilter.outdir&quot;</span><span class="p">:</span> <span class="s2">&quot;/path/to/rqcfiltered&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul>
+<li><p>The json file includes three parts:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>database path,</p></li>
+<li><p>fastq (illumina paired-end interleaved fastq)</p></li>
+<li><p>output path</p></li>
+</ol>
+</div></blockquote>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the input is paired-end fastq file, it should be in interleaved format. Below is command use the SRR7877884 as example to convert the paired-end reads in two files into one interleaved format fastq file.</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>paste &lt;<span class="o">(</span>zcat SRR7877884_1.fastq.gz <span class="p">|</span> paste - - - -<span class="o">)</span> &lt;<span class="o">(</span>zcat SRR7877884_2.fastq.gz <span class="p">|</span> paste - - - -<span class="o">)</span> <span class="p">|</span> tr <span class="s1">&#39;\t&#39;</span> <span class="s1">&#39;\n&#39;</span> <span class="p">|</span> gzip -c &gt; SRR7877884-int.fastq.gz
+</pre></div>
+</div>
+</div>
+<div class="section" id="outputs">
+<h3>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline">¶</a></h3>
+<p>The output will have one directory named by prefix of the fastq input file and a bunch of output files, including statistical numbers, status log and a shell script to reproduce the steps etc.</p>
+<p>The main QC fastq output is named by prefix.anqdpht.fast.gz:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">|--</span> <span class="n">SRR7877884</span><span class="o">.</span><span class="n">anqdpht</span><span class="o">.</span><span class="n">fastq</span><span class="o">.</span><span class="n">gz</span>
+<span class="o">|--</span> <span class="n">filterStats</span><span class="o">.</span><span class="n">txt</span>
+<span class="o">|--</span> <span class="n">filterStats2</span><span class="o">.</span><span class="n">txt</span>
+<span class="o">|--</span> <span class="n">adaptersDetected</span><span class="o">.</span><span class="n">fa</span>
+<span class="o">|--</span> <span class="n">reproduce</span><span class="o">.</span><span class="n">sh</span>
+<span class="o">|--</span> <span class="n">spikein</span><span class="o">.</span><span class="n">fq</span><span class="o">.</span><span class="n">gz</span>
+<span class="o">|--</span> <span class="n">status</span><span class="o">.</span><span class="n">log</span>
+<span class="o">|--</span> <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="requirements-for-execution">
+<h2>Requirements for Execution<a class="headerlink" href="#requirements-for-execution" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Docker or other Container Runtime</p></li>
+<li><p>Cromwell or other WDL-capable Workflow Execution Tool</p></li>
+<li><p>&gt; 40 GB RAM</p></li>
+</ul>
+</div>
+<div class="section" id="running-workflow-in-cromwell-on-cori">
+<h2>Running Workflow in Cromwell on Cori<a class="headerlink" href="#running-workflow-in-cromwell-on-cori" title="Permalink to this headline">¶</a></h2>
+<p>We provide two ways to run the workflow.</p>
+<ol class="arabic simple">
+<li><p><cite>SlurmCromwellShifter/</cite>: The submit script will request a node and launch the Cromwell.  The Cromwell manages the workflow by using Shifter to run applications.</p></li>
+<li><p><cite>CromwellSlurmShifter/</cite>: The Cromwell run in head node and manages the workflow by submitting each step of workflow to compute node where applications were ran by Shifter.</p></li>
+</ol>
+<dl class="simple">
+<dt>Description of the files in each sud-directory in <a class="reference external" href="https://github.com/microbiomedata/ReadsQC">GitHub Repo</a>:</dt><dd><ul class="simple">
+<li><p><cite>.wdl</cite> file: the WDL file for workflow definition</p></li>
+<li><p><cite>.json</cite> file: the example input for the workflow</p></li>
+<li><p><cite>.conf</cite> file: the conf file for running Cromwell.</p></li>
+<li><p><cite>.sh</cite> file: the shell script for running the example workflow</p></li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-history">
+<h2>Version History<a class="headerlink" href="#version-history" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>1.0.0</p></li>
+</ul>
+</div>
+<div class="section" id="point-of-contact">
+<h2>Point of contact<a class="headerlink" href="#point-of-contact" title="Permalink to this headline">¶</a></h2>
+<p>Original author: Brian Bushnell &lt;<a class="reference external" href="mailto:bbushnell&#37;&#52;&#48;lbl&#46;gov">bbushnell<span>&#64;</span>lbl<span>&#46;</span>gov</a>&gt;</p>
+<p>Package maintainer: Chienchi Lo &lt;<a class="reference external" href="mailto:chienchi&#37;&#52;&#48;lanl&#46;gov">chienchi<span>&#64;</span>lanl<span>&#46;</span>gov</a>&gt;</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">NMDC Workflows</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The Reads QC Workflow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#workflow-diagram">Workflow Diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#workflow-dependencies">Workflow Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#workflow-availability">Workflow Availability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-datasets">Test datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#details">Details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements-for-execution">Requirements for Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-workflow-in-cromwell-on-cori">Running Workflow in Cromwell on Cori</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-history">Version History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#point-of-contact">Point of contact</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="2_MAG_index.html">Metagenome assembled genomes generation workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="3_MetaGAssemly_index.html">The Metagenome Assembly Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="4_MetaGAnnotation_index.html">Metagenome Annotation Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5_Metaproteomics_index.html">Metaproteomic Workflow</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="overview.html" title="previous chapter">Overview</a></li>
+      <li>Next: <a href="2_MAG_index.html" title="next chapter">Metagenome assembled genomes generation workflow</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, National Microbiome Data Collaborative.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/chapters/1_RQC_index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

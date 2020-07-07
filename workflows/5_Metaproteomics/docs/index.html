@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metaproteomic Workflow &#8212; NMDC Workflows 0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="metaproteomic-workflow">
+<h1>Metaproteomic Workflow<a class="headerlink" href="#metaproteomic-workflow" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>The metaproteomics workflow/pipeline is an end-to-end data processing workflow for protein identification and characterization using MS/MS data. Briefly, mass spectrometry instrument generated data files(.RAW) are converted to mzML, an open data format, using MSConvert. Peptide identification is achieved using MSGF+ and the associated metagenomic information in the FASTA (protein sequences) file format. Intensity information for identified species is extracted using MASIC and combined with protein information.</p>
+</div>
+<div class="section" id="workflow-diagram">
+<h2>Workflow Diagram<a class="headerlink" href="#workflow-diagram" title="Permalink to this headline">¶</a></h2>
+<img alt="../../../_images/workflow_diagram.png" src="../../../_images/workflow_diagram.png" />
+</div>
+<div class="section" id="workflow-dependencies">
+<h2>Workflow Dependencies<a class="headerlink" href="#workflow-dependencies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="third-party-software">
+<h3>Third party software<a class="headerlink" href="#third-party-software" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="p">|</span>----------------------------<span class="p">|</span>------------------------------------------<span class="p">|</span>
+<span class="p">|</span> MSGFPlus                   <span class="p">|</span> v20190628                                <span class="p">|</span>
+<span class="p">|</span> Mzid-To-Tsv-Converter      <span class="p">|</span> v1.3.3                                   <span class="p">|</span>
+<span class="p">|</span> PeptideHitResultsProcessor <span class="p">|</span> v1.5.7130                                <span class="p">|</span>
+<span class="p">|</span> pwiz-bin-windows           <span class="p">|</span> x86_64-vc141-release-3_0_20149_b73158966 <span class="p">|</span>
+<span class="p">|</span> MASIC                      <span class="p">|</span> v3.0.7235                                <span class="p">|</span>
+<span class="p">|</span> sqlite-netFx-full-source   <span class="p">|</span> <span class="m">1</span>.0.111.0                                <span class="p">|</span>
+<span class="p">|</span> Conda                      <span class="p">|</span> <span class="o">(</span><span class="m">3</span>-clause BSD<span class="o">)</span>                           <span class="p">|</span>
+<span class="p">|</span>                            <span class="p">|</span>                                          <span class="p">|</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="workflow-availability">
+<h2>Workflow Availability<a class="headerlink" href="#workflow-availability" title="Permalink to this headline">¶</a></h2>
+<p>The workflow is available in GitHub:
+<a class="reference external" href="https://github.com/microbiomedata/metaPro">https://github.com/microbiomedata/metaPro</a></p>
+<p>The container is available at Docker Hub (microbiomedata/mepro):
+<a class="reference external" href="https://hub.docker.com/r/microbiomedata/mepro">https://hub.docker.com/r/microbiomedata/mepro</a></p>
+<div class="section" id="inputs">
+<h3>Inputs<a class="headerlink" href="#inputs" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><cite>.raw</cite>, <cite>FASTA</cite>, <cite>parameter files</cite></p></li>
+</ul>
+</div>
+<div class="section" id="outputs">
+<h3>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Processing multiple datasets.</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.
+├── Data/
+├── FDR_table.csv
+├── Plots/
+├── dataset_job_map.csv
+├── peak_area_crosstab_by_dataset_id.csv
+├── protein_peptide_map.csv
+├── specID_table.csv
+└── spectra_count_crosstab_by_dataset_id.csv
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Processing single FICUS dataset.</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="p">|</span> DatasetName <span class="p">|</span> PeptideSequence <span class="p">|</span> FirstHitProtein <span class="p">|</span> SpectralCount <span class="p">|</span> sum<span class="o">(</span>MasicAbundance<span class="o">)</span> <span class="p">|</span> GeneCount <span class="p">|</span> FullGeneList <span class="p">|</span> FirstHitDescription <span class="p">|</span> DescriptionList <span class="p">|</span> min<span class="o">(</span>Qvalue<span class="o">)</span> <span class="p">|</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="requirements-for-execution">
+<h2>Requirements for Execution<a class="headerlink" href="#requirements-for-execution" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Docker or other Container Runtime</p></li>
+</ul>
+</div>
+<div class="section" id="version-history">
+<h2>Version History<a class="headerlink" href="#version-history" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>1.0.0</p></li>
+</ul>
+</div>
+<div class="section" id="point-of-contact">
+<h2>Point of contact<a class="headerlink" href="#point-of-contact" title="Permalink to this headline">¶</a></h2>
+<p>Package maintainer: Anubhav &lt;<a class="reference external" href="mailto:anubhav&#37;&#52;&#48;pnnl&#46;gov">anubhav<span>&#64;</span>pnnl<span>&#46;</span>gov</a>&gt;</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">NMDC Workflows</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, National Microbiome Data Collaborative.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/workflows/5_Metaproteomics/docs/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

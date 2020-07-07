@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metagenome Annotation Workflow &#8212; NMDC Workflows 0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="metagenome-annotation-workflow">
+<h1>Metagenome Annotation Workflow<a class="headerlink" href="#metagenome-annotation-workflow" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>This workflow is based on the JGI/IMG metagenome annotation pipeline.
+It takes assembled metagenomes and generates structrual and functional annotations.  The workflow splits the input assembly
+into 10MB shards and proccesses those in parallel.  The workflow uses a number of open-source tools and databases to generate the structural
+and functional annotations.</p>
+</div>
+<div class="section" id="workflow-diagram">
+<h2>Workflow Diagram<a class="headerlink" href="#workflow-diagram" title="Permalink to this headline">¶</a></h2>
+<img alt="../../_images/4_MetaGAnnotation_annotation.png" src="../../_images/4_MetaGAnnotation_annotation.png" />
+</div>
+<div class="section" id="workflow-dependencies">
+<h2>Workflow Dependencies<a class="headerlink" href="#workflow-dependencies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="third-party-software">
+<h3>Third party software<a class="headerlink" href="#third-party-software" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Conda (3-clause BSD)</p></li>
+<li><p>tRNAscan-SE &gt;= 2.0 (GNU GPL v3)</p></li>
+<li><p>Infernal 1.1.2 (BSD)</p></li>
+<li><p>CRT-CLI 1.8 (Public domain software, last official version is 1.2)</p></li>
+<li><p>Prodigal 2.6.3 (GNU GPL v3)</p></li>
+<li><p>GeneMarkS-2 &gt;= 1.07 (Academic license for GeneMark family software)</p></li>
+<li><p>Last &gt;= 983 (GNU GPL v3)</p></li>
+<li><p>HMMER 3.1b2 (3-clause BSD)</p></li>
+<li><p>TMHMM 2.0 (Academic)</p></li>
+</ul>
+</div>
+<div class="section" id="database">
+<h3>Database<a class="headerlink" href="#database" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Rfam (Creative Commons Zero (“CC0”))</p></li>
+<li><p>SMART (Academic)</p></li>
+<li><p>COG (Free, No license available, HMMs created from the 2003 models)</p></li>
+<li><p>TIGRFAM (Free, No license available)</p></li>
+<li><p>SUPERFAMILY (Academic)</p></li>
+<li><p>Pfam (GNU Lesser General Public License)</p></li>
+<li><p>Cath-FunFam (Free, No license available)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="workflow-availability">
+<h2>Workflow Availability<a class="headerlink" href="#workflow-availability" title="Permalink to this headline">¶</a></h2>
+<p>The workflow is available in GitHub:
+<a class="reference external" href="https://github.com/microbiomedata/mg_annotation/">https://github.com/microbiomedata/mg_annotation/</a></p>
+<p>The container is available at Docker Hub (microbiomedata/mg-annotation):
+<a class="reference external" href="https://hub.docker.com/r/microbiomedata/mg-annotation">https://hub.docker.com/r/microbiomedata/mg-annotation</a></p>
+<p>The databases are available by request.
+Please contact NMDC (<a class="reference external" href="mailto:support&#37;&#52;&#48;microbiomedata&#46;org">support<span>&#64;</span>microbiomedata<span>&#46;</span>org</a>) for access.</p>
+</div>
+<div class="section" id="test-datasets">
+<h2>Test datasets<a class="headerlink" href="#test-datasets" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://raw.githubusercontent.com/microbiomedata/mg_annotation/master/example.fasta">https://raw.githubusercontent.com/microbiomedata/mg_annotation/master/example.fasta</a></p>
+</div>
+<div class="section" id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h2>
+<p>The annotation workflow is based on the IMG annotation workflow.  The input assembly
+is first split into 10MB chunks.  Depending on the workflow engine configuration,
+the in splits can be processed in parallel.  Each split is first structurally annotated,
+then then those results are used for the functional annotation.  The structural annotation
+uses tRNAscan_se, RFAM, CRT, Prodigal and GeneMarkS.  These results are merged to create
+a concensus structural annotation.  The resulting GFF is used in the functional annootation
+which uses multiple protein family databases (SMART, COG, TIGRFAM, SUPERFAMILY, Pfam and
+Cath-FunFam) along with custom HMM models to generate the functional annotations.  These
+predictions are done using Last and HMM.  These annotations are merged into a consensus
+GFF file.  Finally, the split annotations are merged together to generate a single structural
+anotation file and single functional annotation file.  In addition, several summary files
+are generated in TSV format.</p>
+<div class="section" id="inputs">
+<h3>Inputs<a class="headerlink" href="#inputs" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Fasta Assembly (generated using the metagenome assembly workflow)</p></li>
+</ul>
+</div>
+<div class="section" id="outputs">
+<h3>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>GFF: Structural annotation</p></li>
+<li><p>GFF: Functional annotation</p></li>
+<li><p>TSV: KO Summary</p></li>
+<li><p>TSV: EC Summary</p></li>
+<li><p>TSV: Gene Phylogeny Summar</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="requirements-for-execution">
+<h2>Requirements for Execution<a class="headerlink" href="#requirements-for-execution" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Docker or other Container Runtime</p></li>
+<li><p>Cromwell or other WDL-capable Workflow Execution Tool</p></li>
+</ul>
+</div>
+<div class="section" id="running-workflow-in-cromwell-on-cori">
+<h2>Running Workflow in Cromwell on Cori<a class="headerlink" href="#running-workflow-in-cromwell-on-cori" title="Permalink to this headline">¶</a></h2>
+<p>TBD</p>
+</div>
+<div class="section" id="version-history">
+<h2>Version History<a class="headerlink" href="#version-history" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>1.0.0</p></li>
+</ul>
+</div>
+<div class="section" id="point-of-contact">
+<h2>Point of contact<a class="headerlink" href="#point-of-contact" title="Permalink to this headline">¶</a></h2>
+<p>Package maintainer: Shane Canon &lt;<a class="reference external" href="mailto:scanon&#37;&#52;&#48;lbl&#46;gov">scanon<span>&#64;</span>lbl<span>&#46;</span>gov</a>&gt;</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">NMDC Workflows</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, National Microbiome Data Collaborative.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/docs/chapters/4_MetaGAnnotation_index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
